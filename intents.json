@@ -16,7 +16,7 @@
   },
   {"tag": "name",
     "patterns": ["what is you name", "what should I call you", "whats your name?", "who are you?", "Can you tell me your name"],
-    "responses": ["I am BalanceBot!", "BalanceBot", "My name is BalanceBot and I focus on mental health and "],
+    "responses": ["I am BalanceBot!", "BalanceBot", "My name is BalanceBot and I focus on mental health and motivation!"],
     "context_set": ""
   }
 ]
