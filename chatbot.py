@@ -6,10 +6,9 @@ import numpy as np
 import nltk
 from nltk.stem import WordNetLemmatizer
 
-import tkinter
 from tkinter import *
-
 from tensorflow.keras.models import load_model
+from time import gmtime, strftime
 
 lemmatizer = WordNetLemmatizer()
 intents = json.loads(open('intents.json').read())
@@ -54,15 +53,16 @@ def get_response(intents_list, intents_json):
             break
     return result
 
-BG_GRAY = "#ABB2B9"
-BG_COLOR = "#17202A"
-TEXT_COLOR = "#EAECEE"
+EMPTY_SPACE_COLOR = "#DEEFF5"
+TEXT_COLOR = "#17202A"
+LABEL_BG_COLOR = "Black"
+CONTRAST_COLOR = "#90EE90"
+DATETIME_COLOR = '#D3D3D3'
 
-FONT = "Helvetica 14"
-FONT_BOLD = "Helvetica 13 bold"
+FONT = "Comic 13 bold"
+FONT_DATETIME = "Comic 12 bold"
 
 class ChatApplication:
-
     def __init__(self):
         self.window = Tk()
         self._setup_main_window()
@@ -73,60 +73,73 @@ class ChatApplication:
     def _setup_main_window(self):
         self.window.title("Chat")
         self.window.resizable(width=False, height=False)
-        self.window.configure(width=500, height=550, bg=BG_COLOR)
+        self.window.configure(width=700, height=550, bg=EMPTY_SPACE_COLOR)
 
         # head label
-        head_label = Label(self.window, bg=BG_COLOR, fg=TEXT_COLOR
-                           , text="Welcome", font=FONT_BOLD, pady=10)
+        head_label = Label(self.window, bg=LABEL_BG_COLOR, fg=EMPTY_SPACE_COLOR,
+                        text="BalanceBot", font=FONT, pady=10)
         head_label.place(relwidth=1)
 
         # tiny divider
-        line = Label(self.window, width=450, bg=BG_GRAY)
+        line = Label(self.window, width=450, bg=CONTRAST_COLOR)
         line.place(relwidth=1, rely=0.07, relheight=0.012)
 
         # text widget
-        self.text_widget = Text(self.window, width=20, height=2, bg=BG_COLOR, fg=TEXT_COLOR,
-                                font=FONT, padx=5, pady=5)
-        self.text_widget.place(relheight=0.745, relwidth=1, rely=0.08)
-        self.text_widget.configure(cursor="arrow", state=DISABLED)
+        self.text_widget = Text(self.window, width=20, height=2, bg=EMPTY_SPACE_COLOR, fg=TEXT_COLOR,
+                                font=FONT, padx=15, pady=5, wrap="word")
+        self.text_widget.place(relheight=0.81, relwidth=1, rely=0.08)
+        self.text_widget.configure(cursor="arrow", state=DISABLED)     
 
         # scroll bar
         scrollbar = Scrollbar(self.text_widget)
-        scrollbar.place(relheight=1, relx=0.974)
+        scrollbar.place(relheight=1, relx=0.99)
         scrollbar.configure(command=self.text_widget.yview)
         
         # bottom label
-        bottom_label = Label(self.window, bg=BG_GRAY, height=80)
-        bottom_label.place(relwidth=1, rely=0.825)
+        bottom_label = Label(self.window, bg=LABEL_BG_COLOR, height=50)
+        bottom_label.place(relwidth=1, rely=0.885)
 
         # Message Entry
-        self.msg_entry = Entry(bottom_label, bg="#2C3E50", fg=TEXT_COLOR, font=FONT)
+        self.msg_entry = Entry(bottom_label, bg=EMPTY_SPACE_COLOR, fg=TEXT_COLOR, font=FONT)
         self.msg_entry.place(relwidth=0.74, relheight=0.06, rely=0.008, relx=0.011)
+        msg1 = "Available Commands: Motivational Tips, Quote, Fact\n\n"
+        self.text_widget.configure(state=NORMAL)
+        self.text_widget.insert(END, msg1)
+        self.text_widget.configure(state=DISABLED)
         self.msg_entry.focus()
         self.msg_entry.bind("<Return>", self._on_enter_pressed)
 
         # Send button
-        send_button = Button(bottom_label, text="Send", font=FONT_BOLD, width=20, bg=BG_GRAY,
+        send_button = Button(bottom_label, text="Send", fg=LABEL_BG_COLOR, font=FONT, width=20, bg=CONTRAST_COLOR,
                              command=lambda: self._on_enter_pressed(None))
         send_button.place(relx=0.77, rely=0.008, relheight=0.06, relwidth=0.22)
-
-
 
     def _on_enter_pressed(self, event):
         msg = self.msg_entry.get()
         self._insert_message(msg, "You")
 
-
     def _insert_message(self, msg, sender):
         if not msg:
             return
 
+        date_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
         self.msg_entry.delete(0, END)
+        msgDateTime1 = f"{date_time}\n"
+        self.text_widget.configure(state=NORMAL)
+        self.text_widget.insert(END, msgDateTime1)
+        self.text_widget.configure(state=DISABLED)
+  
         msg1 = f"{sender}: {msg}\n\n"
         self.text_widget.configure(state=NORMAL)
         self.text_widget.insert(END, msg1)
         self.text_widget.configure(state=DISABLED)
 
+        msgDateTime2 = f"{date_time}\n"
+        self.text_widget.configure(state=NORMAL)
+        self.text_widget.insert(END, msgDateTime2)
+        self.text_widget.configure(state=DISABLED)
+        
         msg2 = f"{chat_bot}: {get_response(predict_class(msg), intents)}\n\n"
         self.text_widget.configure(state=NORMAL)
         self.text_widget.insert(END, msg2)
@@ -134,13 +147,6 @@ class ChatApplication:
 
         self.text_widget.see(END)
 
-
 if __name__ == "__main__":
     app = ChatApplication()
     app.run()
-
-#while True:
-    #message = input("")
-    #ints = predict_class(message)
-    #res = get_response(ints, intents)
-    #print(res)
