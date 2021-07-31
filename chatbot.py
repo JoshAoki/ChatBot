@@ -7,6 +7,7 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 
 from tkinter import *
+from numpy.lib.arraypad import pad
 from tensorflow.keras.models import load_model
 from time import gmtime, strftime
 
@@ -86,13 +87,18 @@ class ChatApplication:
 
         # text widget
         self.text_widget = Text(self.window, width=20, height=2, bg=EMPTY_SPACE_COLOR, fg=TEXT_COLOR,
-                                font=FONT, padx=15, pady=5, wrap="word")
+                                font=FONT, padx=10, pady=5, wrap="word")
         self.text_widget.place(relheight=0.81, relwidth=1, rely=0.08)
         self.text_widget.configure(cursor="arrow", state=DISABLED)     
 
+        self.text_widget.tag_configure("tag-user-normal", foreground="black", font="Comic 13 bold", justify="right")
+        self.text_widget.tag_configure("tag-user-datetime", foreground="gray", font="Comic 8 bold", justify="right")
+        self.text_widget.tag_configure("tag-bot-normal", foreground="black", font="Comic 13 bold", justify="left")
+        self.text_widget.tag_configure("tag-bot-datetime", foreground="gray", font="Comic 8 bold", justify="left")
+
         # scroll bar
-        scrollbar = Scrollbar(self.text_widget)
-        scrollbar.place(relheight=1, relx=0.99)
+        scrollbar = Scrollbar(self.text_widget, width=20)
+        scrollbar.place(relheight=1, relx=1.5)
         scrollbar.configure(command=self.text_widget.yview)
         
         # bottom label
@@ -117,7 +123,7 @@ class ChatApplication:
     def _on_enter_pressed(self, event):
         msg = self.msg_entry.get()
         self._insert_message(msg, "You")
-
+    
     def _insert_message(self, msg, sender):
         if not msg:
             return
@@ -127,22 +133,22 @@ class ChatApplication:
         self.msg_entry.delete(0, END)
         msgDateTime1 = f"{date_time}\n"
         self.text_widget.configure(state=NORMAL)
-        self.text_widget.insert(END, msgDateTime1)
+        self.text_widget.insert(END, msgDateTime1, 'tag-user-datetime')
         self.text_widget.configure(state=DISABLED)
   
         msg1 = f"{sender}: {msg}\n\n"
         self.text_widget.configure(state=NORMAL)
-        self.text_widget.insert(END, msg1)
+        self.text_widget.insert(END, msg1, 'tag-user-normal')
         self.text_widget.configure(state=DISABLED)
 
         msgDateTime2 = f"{date_time}\n"
         self.text_widget.configure(state=NORMAL)
-        self.text_widget.insert(END, msgDateTime2)
+        self.text_widget.insert(END, msgDateTime2, 'tag-bot-datetime')
         self.text_widget.configure(state=DISABLED)
         
         msg2 = f"{chat_bot}: {get_response(predict_class(msg), intents)}\n\n"
         self.text_widget.configure(state=NORMAL)
-        self.text_widget.insert(END, msg2)
+        self.text_widget.insert(END, msg2, 'tag-bot-normal')
         self.text_widget.configure(state=DISABLED)
 
         self.text_widget.see(END)
